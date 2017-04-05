@@ -1,6 +1,6 @@
 #= require <Element>
 
-Element = @Spark?.Element || require('spark-starter')
+Element = Spark?.Element || @Spark?.Element || require('spark-starter')
 
 class PathFinder extends Element
   constructor: (@tilesContainer, @from, @to, options={}) ->
