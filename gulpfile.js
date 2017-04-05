@@ -17,7 +17,7 @@ gulp.task('coffeeTest', function() {
     .pipe(gulp.dest('./test/'));
 });
 
-gulp.task('compress', function () {
+gulp.task('compress', ['coffee'], function () {
   gulp.src('./dist/pathfinder.js')
     .pipe(uglify())
     .pipe(rename('pathfinder.min.js'))

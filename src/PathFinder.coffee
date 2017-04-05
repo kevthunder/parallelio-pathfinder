@@ -1,4 +1,4 @@
-#= require ../node_modules/spark-starter/src/Element.coffee
+#= require <Element>
 
 Element = @Spark?.Element || require('spark-starter')
 
