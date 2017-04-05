@@ -310,7 +310,11 @@
 
   })();
 
-  if ((typeof module !== "undefined" && module !== null) && (this.Parallelio == null)) {
+  if (typeof Parallelio !== "undefined" && Parallelio !== null) {
+    Parallelio.PathFinder = PathFinder;
+  }
+
+  if (typeof module !== "undefined" && module !== null) {
     module.exports = PathFinder;
   } else {
     if (this.Parallelio == null) {

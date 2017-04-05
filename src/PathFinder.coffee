@@ -195,9 +195,11 @@ class PathFinder.Step
       @remaining = Math.sqrt( x * x + y * y )
     @remaining
     
-if module? && !@Parallelio?
+if Parallelio?
+  Parallelio.PathFinder = PathFinder
+if module?
   module.exports = PathFinder
-else 
+else
   unless @Parallelio?
     @Parallelio = {}
   @Parallelio.PathFinder = PathFinder
