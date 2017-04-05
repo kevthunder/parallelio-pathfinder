@@ -314,6 +314,9 @@
     Parallelio.PathFinder = PathFinder;
   }
 
+
+  /* Standalone */
+
   if (typeof module !== "undefined" && module !== null) {
     module.exports = PathFinder;
   } else {
@@ -322,5 +325,8 @@
     }
     this.Parallelio.PathFinder = PathFinder;
   }
+
+
+  /* Standalone end */
 
 }).call(this);

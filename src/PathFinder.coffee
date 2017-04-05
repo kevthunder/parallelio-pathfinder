@@ -197,11 +197,13 @@ class PathFinder.Step
     
 if Parallelio?
   Parallelio.PathFinder = PathFinder
+### Standalone ###
 if module?
   module.exports = PathFinder
 else
   unless @Parallelio?
     @Parallelio = {}
   @Parallelio.PathFinder = PathFinder
+### Standalone end ###
   
   
