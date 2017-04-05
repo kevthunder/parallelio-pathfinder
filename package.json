@@ -1,6 +1,5 @@
 {
   "name": "parallelio-pathfinder",
-  "version": "1.0.0",
   "description": "Pathfinder",
   "main": "dist/pathfinder.js",
   "scripts": {
