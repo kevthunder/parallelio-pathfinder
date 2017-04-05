@@ -1,6 +1,7 @@
 #= require <Element>
-
-Element = Spark?.Element || @Spark?.Element || require('spark-starter')
+#--- Standalone ---
+Element = @Spark?.Element || require('spark-starter')
+#--- Standalone end ---
 
 class PathFinder extends Element
   constructor: (@tilesContainer, @from, @to, options={}) ->
@@ -197,13 +198,13 @@ class PathFinder.Step
     
 if Parallelio?
   Parallelio.PathFinder = PathFinder
-### Standalone ###
+#--- Standalone ---
 if module?
   module.exports = PathFinder
 else
   unless @Parallelio?
     @Parallelio = {}
   @Parallelio.PathFinder = PathFinder
-### Standalone end ###
+#--- Standalone end ---
   
   
