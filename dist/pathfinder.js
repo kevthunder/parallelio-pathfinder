@@ -310,7 +310,7 @@
 
   })();
 
-  if (typeof module !== "undefined" && module !== null) {
+  if ((typeof module !== "undefined" && module !== null) && (this.Parallelio == null)) {
     module.exports = PathFinder;
   } else {
     if (this.Parallelio == null) {
