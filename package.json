@@ -21,6 +21,6 @@
     "mocha": "^3.2.0"
   },
   "dependencies": {
-    "spark-starter": "kevthunder/spark-starter"
+    "spark-starter": "kevthunder/spark-starter#v0.3"
   }
 }

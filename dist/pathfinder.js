@@ -3,7 +3,7 @@
     extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     hasProp = {}.hasOwnProperty;
 
-  Element = ((ref1 = this.Spark) != null ? ref1.Element : void 0) || require('spark-starter');
+  Element = ((ref1 = this.Spark) != null ? ref1.Element : void 0) || require('spark-starter').Element;
 
   PathFinder = (function(superClass) {
     extend(PathFinder, superClass);

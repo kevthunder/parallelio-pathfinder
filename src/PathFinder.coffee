@@ -1,6 +1,6 @@
 #= require <Element>
 #--- Standalone ---
-Element = @Spark?.Element || require('spark-starter')
+Element = @Spark?.Element || require('spark-starter').Element 
 #--- Standalone end ---
 
 class PathFinder extends Element

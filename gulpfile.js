@@ -29,7 +29,7 @@ gulp.task('build', ['coffee', 'compress'], function () {
 });
 
 gulp.task('test', ['coffee','coffeeTest'], function() {
-  return gulp.src('./test/pathfinder.js')
+  return gulp.src('./test/tests.js')
     .pipe(mocha());
 });
 
