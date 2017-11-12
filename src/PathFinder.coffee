@@ -1,7 +1,4 @@
-#= require <Element>
-#--- Standalone ---
-Element = @Spark?.Element || require('spark-starter').Element 
-#--- Standalone end ---
+Element = require('spark-starter').Element
 
 class PathFinder extends Element
   constructor: (@tilesContainer, @from, @to, options={}) ->
@@ -196,15 +193,3 @@ class PathFinder.Step
       @remaining = Math.sqrt( x * x + y * y )
     @remaining
     
-if Parallelio?
-  Parallelio.PathFinder = PathFinder
-#--- Standalone ---
-if module?
-  module.exports = PathFinder
-else
-  unless @Parallelio?
-    @Parallelio = {}
-  @Parallelio.PathFinder = PathFinder
-#--- Standalone end ---
-  
-  

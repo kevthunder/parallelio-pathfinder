@@ -3,10 +3,12 @@ var rename = require("gulp-rename");
 var coffee = require('gulp-coffee');
 var uglify = require('gulp-uglify');
 var mocha = require('gulp-mocha');
+var wrapper = require('spark-wrapper');
 
 gulp.task('coffee', function() {
   return gulp.src('./src/*.coffee')
-    .pipe(coffee())
+    .pipe(coffee({bare: true}))
+    .pipe(wrapper({namespace:'Parallelio'}))
     .pipe(rename('pathfinder.js'))
     .pipe(gulp.dest('./dist/'));
 });
