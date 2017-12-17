@@ -33,6 +33,9 @@ class PathFinder extends Element
         res.unshift(step.prev)
         step = step.prev
       res
+  getPosAtPrc: (prc) ->
+    if @solution
+      getPosAtTime(@solution.getTotalLength()*prc)
   getPosAtTime: (time) ->
     if @solution
       if time >= @solution.getTotalLength()

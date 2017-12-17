@@ -62,6 +62,12 @@ PathFinder = (function(superClass) {
     }
   };
 
+  PathFinder.prototype.getPosAtPrc = function(prc) {
+    if (this.solution) {
+      return getPosAtTime(this.solution.getTotalLength() * prc);
+    }
+  };
+
   PathFinder.prototype.getPosAtTime = function(time) {
     var prc, step;
     if (this.solution) {
