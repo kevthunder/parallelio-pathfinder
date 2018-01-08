@@ -63,8 +63,11 @@ PathFinder = (function(superClass) {
   };
 
   PathFinder.prototype.getPosAtPrc = function(prc) {
+    if (isNaN(prc)) {
+      throw new Error('Invalid number');
+    }
     if (this.solution) {
-      return getPosAtTime(this.solution.getTotalLength() * prc);
+      return this.getPosAtTime(this.solution.getTotalLength() * prc);
     }
   };
 
@@ -222,7 +225,7 @@ PathFinder.Step = (function() {
 
   Step.prototype.posToTileOffset = function(x, y) {
     var tile;
-    tile = Math.floor(x) === this.tile.x && Math.floor(y) === this.tile.y ? this.tile : Math.floor(x) === this.nextTile.x && Math.floor(y) === this.nextTile.y ? this.nextTile : (this.prev != null) && Math.floor(x) === this.prev.tile.x && Math.floor(y) === this.prev.tile.y ? this.prev.tile : console.log('Math.floor(' + x + ') == ' + this.tile.x, 'Math.floor(' + y + ') == ' + this.tile.y, this);
+    tile = Math.floor(x) === this.tile.x && Math.floor(y) === this.tile.y ? this.tile : (this.nextTile != null) && Math.floor(x) === this.nextTile.x && Math.floor(y) === this.nextTile.y ? this.nextTile : (this.prev != null) && Math.floor(x) === this.prev.tile.x && Math.floor(y) === this.prev.tile.y ? this.prev.tile : console.log('Math.floor(' + x + ') == ' + this.tile.x, 'Math.floor(' + y + ') == ' + this.tile.y, this);
     return {
       x: x,
       y: y,

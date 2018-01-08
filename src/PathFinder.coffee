@@ -34,8 +34,10 @@ class PathFinder extends Element
         step = step.prev
       res
   getPosAtPrc: (prc) ->
+    if isNaN(prc)
+      throw new Error('Invalid number')
     if @solution
-      getPosAtTime(@solution.getTotalLength()*prc)
+      @getPosAtTime(@solution.getTotalLength()*prc)
   getPosAtTime: (time) ->
     if @solution
       if time >= @solution.getTotalLength()
@@ -130,7 +132,7 @@ class PathFinder.Step
   posToTileOffset: (x, y)->
     tile = if Math.floor(x) == @tile.x and Math.floor(y) == @tile.y
       @tile
-    else if Math.floor(x) == @nextTile.x and Math.floor(y) == @nextTile.y
+    else if @nextTile? && Math.floor(x) == @nextTile.x and Math.floor(y) == @nextTile.y
       @nextTile
     else if @prev? and  Math.floor(x) == @prev.tile.x and Math.floor(y) == @prev.tile.y
       @prev.tile
