@@ -2,6 +2,7 @@ Element = require('spark-starter').Element
 
 class PathFinder extends Element
   constructor: (@tilesContainer, @from, @to, options={}) ->
+    super()
     @reset()
     if options.validTile?
       @validTileCallback = options.validTile

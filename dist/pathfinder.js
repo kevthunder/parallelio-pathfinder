@@ -1,229 +1,224 @@
 (function(definition){PathFinder=definition(typeof(Parallelio)!=="undefined"?Parallelio:this.Parallelio);PathFinder.definition=definition;if(typeof(module)!=="undefined"&&module!==null){module.exports=PathFinder;}else{if(typeof(Parallelio)!=="undefined"&&Parallelio!==null){Parallelio.PathFinder=PathFinder;}else{if(this.Parallelio==null){this.Parallelio={};}this.Parallelio.PathFinder=PathFinder;}}})(function(dependencies){if(dependencies==null){dependencies={};}
 var Element = dependencies.hasOwnProperty("Element") ? dependencies.Element : require('spark-starter').Element;
-var PathFinder, extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
-PathFinder = (function(superClass) {
-  extend(PathFinder, superClass);
+var PathFinder;
+PathFinder = (function() {
+  class PathFinder extends Element {
+    constructor(tilesContainer, from1, to1, options = {}) {
+      super();
+      this.tilesContainer = tilesContainer;
+      this.from = from1;
+      this.to = to1;
+      this.reset();
+      if (options.validTile != null) {
+        this.validTileCallback = options.validTile;
+      }
+    }
 
-  function PathFinder(tilesContainer, from1, to1, options) {
-    this.tilesContainer = tilesContainer;
-    this.from = from1;
-    this.to = to1;
-    if (options == null) {
-      options = {};
+    reset() {
+      this.queue = [];
+      this.paths = {};
+      this.solution = null;
+      return this.started = false;
     }
-    this.reset();
-    if (options.validTile != null) {
-      this.validTileCallback = options.validTile;
+
+    calcul() {
+      while (!this.solution && (!this.started || this.queue.length)) {
+        this.step();
+      }
+      return this.getPath();
     }
-  }
+
+    step() {
+      var next;
+      if (this.queue.length) {
+        next = this.queue.pop();
+        this.addNextSteps(next);
+        return true;
+      } else if (!this.started) {
+        this.started = true;
+        this.addNextSteps();
+        return true;
+      }
+    }
+
+    getPath() {
+      var res, step;
+      if (this.solution) {
+        res = [this.solution];
+        step = this.solution;
+        while (step.prev != null) {
+          res.unshift(step.prev);
+          step = step.prev;
+        }
+        return res;
+      }
+    }
+
+    getPosAtPrc(prc) {
+      if (isNaN(prc)) {
+        throw new Error('Invalid number');
+      }
+      if (this.solution) {
+        return this.getPosAtTime(this.solution.getTotalLength() * prc);
+      }
+    }
+
+    getPosAtTime(time) {
+      var prc, step;
+      if (this.solution) {
+        if (time >= this.solution.getTotalLength()) {
+          return this.solution.posToTileOffset(this.solution.getExit().x, this.solution.getExit().y);
+        } else {
+          step = this.solution;
+          while (step.getStartLength() > time && (step.prev != null)) {
+            step = step.prev;
+          }
+          prc = (time - step.getStartLength()) / step.getLength();
+          return step.posToTileOffset(step.getEntry().x + (step.getExit().x - step.getEntry().x) * prc, step.getEntry().y + (step.getExit().y - step.getEntry().y) * prc);
+        }
+      }
+    }
+
+    tileIsValid(tile) {
+      if (this.validTileCallback != null) {
+        return this.validTileCallback(tile);
+      } else {
+        return !tile.emulated || (tile.tile !== 0 && tile.tile !== false);
+      }
+    }
+
+    getTile(x, y) {
+      var ref1;
+      if (this.tilesContainer.getTile != null) {
+        return this.tilesContainer.getTile(x, y);
+      } else if (((ref1 = this.tilesContainer[y]) != null ? ref1[x] : void 0) != null) {
+        return {
+          x: x,
+          y: y,
+          tile: this.tilesContainer[y][x],
+          emulated: true
+        };
+      }
+    }
+
+    getConnectedToTile(tile) {
+      var connected, t;
+      if (tile.getConnected != null) {
+        return tile.getConnected();
+      } else {
+        connected = [];
+        if (t = this.getTile(tile.x + 1, tile.y)) {
+          connected.push(t);
+        }
+        if (t = this.getTile(tile.x - 1, tile.y)) {
+          connected.push(t);
+        }
+        if (t = this.getTile(tile.x, tile.y + 1)) {
+          connected.push(t);
+        }
+        if (t = this.getTile(tile.x, tile.y - 1)) {
+          connected.push(t);
+        }
+        return connected;
+      }
+    }
+
+    addNextSteps(step = null) {
+      var i, len, next, ref1, results, tile;
+      tile = step != null ? step.nextTile : this.from;
+      ref1 = this.getConnectedToTile(tile);
+      results = [];
+      for (i = 0, len = ref1.length; i < len; i++) {
+        next = ref1[i];
+        if (this.tileIsValid(next)) {
+          results.push(this.addStep(new PathFinder.Step(this, (step != null ? step : null), tile, next)));
+        } else {
+          results.push(void 0);
+        }
+      }
+      return results;
+    }
+
+    tileEqual(tileA, tileB) {
+      return tileA === tileB || ((tileA.emulated || tileB.emulated) && tileA.x === tileB.x && tileA.y === tileB.y);
+    }
+
+    addStep(step) {
+      if (this.paths[step.getExit().x] == null) {
+        this.paths[step.getExit().x] = {};
+      }
+      if (!((this.paths[step.getExit().x][step.getExit().y] != null) && this.paths[step.getExit().x][step.getExit().y].getTotalLength() <= step.getTotalLength())) {
+        if (this.paths[step.getExit().x][step.getExit().y] != null) {
+          this.removeStep(this.paths[step.getExit().x][step.getExit().y]);
+        }
+        this.paths[step.getExit().x][step.getExit().y] = step;
+        this.queue.splice(this.getStepRank(step), 0, step);
+        if (this.tileEqual(step.nextTile, this.to) && !((this.solution != null) && this.solution.prev.getTotalLength() <= step.getTotalLength())) {
+          return this.solution = new PathFinder.Step(this, step, step.nextTile, null);
+        }
+      }
+    }
+
+    removeStep(step) {
+      var index;
+      index = this.queue.indexOf(step);
+      if (index > -1) {
+        return this.queue.splice(index, 1);
+      }
+    }
+
+    best() {
+      return this.queue[this.queue.length - 1];
+    }
+
+    getStepRank(step) {
+      if (this.queue.length === 0) {
+        return 0;
+      } else {
+        return this._getStepRank(step.getEfficiency(), 0, this.queue.length - 1);
+      }
+    }
+
+    _getStepRank(efficiency, min, max) {
+      var ref, refPos;
+      refPos = Math.floor((max - min) / 2) + min;
+      ref = this.queue[refPos].getEfficiency();
+      if (ref === efficiency) {
+        return refPos;
+      } else if (ref > efficiency) {
+        if (refPos === min) {
+          return min;
+        } else {
+          return this._getStepRank(efficiency, min, refPos - 1);
+        }
+      } else {
+        if (refPos === max) {
+          return max + 1;
+        } else {
+          return this._getStepRank(efficiency, refPos + 1, max);
+        }
+      }
+    }
+
+  };
 
   PathFinder.properties({
     validTileCallback: {}
   });
 
-  PathFinder.prototype.reset = function() {
-    this.queue = [];
-    this.paths = {};
-    this.solution = null;
-    return this.started = false;
-  };
-
-  PathFinder.prototype.calcul = function() {
-    while (!this.solution && (!this.started || this.queue.length)) {
-      this.step();
-    }
-    return this.getPath();
-  };
-
-  PathFinder.prototype.step = function() {
-    var next;
-    if (this.queue.length) {
-      next = this.queue.pop();
-      this.addNextSteps(next);
-      return true;
-    } else if (!this.started) {
-      this.started = true;
-      this.addNextSteps();
-      return true;
-    }
-  };
-
-  PathFinder.prototype.getPath = function() {
-    var res, step;
-    if (this.solution) {
-      res = [this.solution];
-      step = this.solution;
-      while (step.prev != null) {
-        res.unshift(step.prev);
-        step = step.prev;
-      }
-      return res;
-    }
-  };
-
-  PathFinder.prototype.getPosAtPrc = function(prc) {
-    if (isNaN(prc)) {
-      throw new Error('Invalid number');
-    }
-    if (this.solution) {
-      return this.getPosAtTime(this.solution.getTotalLength() * prc);
-    }
-  };
-
-  PathFinder.prototype.getPosAtTime = function(time) {
-    var prc, step;
-    if (this.solution) {
-      if (time >= this.solution.getTotalLength()) {
-        return this.solution.posToTileOffset(this.solution.getExit().x, this.solution.getExit().y);
-      } else {
-        step = this.solution;
-        while (step.getStartLength() > time && (step.prev != null)) {
-          step = step.prev;
-        }
-        prc = (time - step.getStartLength()) / step.getLength();
-        return step.posToTileOffset(step.getEntry().x + (step.getExit().x - step.getEntry().x) * prc, step.getEntry().y + (step.getExit().y - step.getEntry().y) * prc);
-      }
-    }
-  };
-
-  PathFinder.prototype.tileIsValid = function(tile) {
-    if (this.validTileCallback != null) {
-      return this.validTileCallback(tile);
-    } else {
-      return !tile.emulated || (tile.tile !== 0 && tile.tile !== false);
-    }
-  };
-
-  PathFinder.prototype.getTile = function(x, y) {
-    var ref1;
-    if (this.tilesContainer.getTile != null) {
-      return this.tilesContainer.getTile(x, y);
-    } else if (((ref1 = this.tilesContainer[y]) != null ? ref1[x] : void 0) != null) {
-      return {
-        x: x,
-        y: y,
-        tile: this.tilesContainer[y][x],
-        emulated: true
-      };
-    }
-  };
-
-  PathFinder.prototype.getConnectedToTile = function(tile) {
-    var connected, t;
-    if (tile.getConnected != null) {
-      return tile.getConnected();
-    } else {
-      connected = [];
-      if (t = this.getTile(tile.x + 1, tile.y)) {
-        connected.push(t);
-      }
-      if (t = this.getTile(tile.x - 1, tile.y)) {
-        connected.push(t);
-      }
-      if (t = this.getTile(tile.x, tile.y + 1)) {
-        connected.push(t);
-      }
-      if (t = this.getTile(tile.x, tile.y - 1)) {
-        connected.push(t);
-      }
-      return connected;
-    }
-  };
-
-  PathFinder.prototype.addNextSteps = function(step) {
-    var i, len, next, ref1, results, tile;
-    if (step == null) {
-      step = null;
-    }
-    tile = step != null ? step.nextTile : this.from;
-    ref1 = this.getConnectedToTile(tile);
-    results = [];
-    for (i = 0, len = ref1.length; i < len; i++) {
-      next = ref1[i];
-      if (this.tileIsValid(next)) {
-        results.push(this.addStep(new PathFinder.Step(this, (step != null ? step : null), tile, next)));
-      } else {
-        results.push(void 0);
-      }
-    }
-    return results;
-  };
-
-  PathFinder.prototype.tileEqual = function(tileA, tileB) {
-    return tileA === tileB || ((tileA.emulated || tileB.emulated) && tileA.x === tileB.x && tileA.y === tileB.y);
-  };
-
-  PathFinder.prototype.addStep = function(step) {
-    if (this.paths[step.getExit().x] == null) {
-      this.paths[step.getExit().x] = {};
-    }
-    if (!((this.paths[step.getExit().x][step.getExit().y] != null) && this.paths[step.getExit().x][step.getExit().y].getTotalLength() <= step.getTotalLength())) {
-      if (this.paths[step.getExit().x][step.getExit().y] != null) {
-        this.removeStep(this.paths[step.getExit().x][step.getExit().y]);
-      }
-      this.paths[step.getExit().x][step.getExit().y] = step;
-      this.queue.splice(this.getStepRank(step), 0, step);
-      if (this.tileEqual(step.nextTile, this.to) && !((this.solution != null) && this.solution.prev.getTotalLength() <= step.getTotalLength())) {
-        return this.solution = new PathFinder.Step(this, step, step.nextTile, null);
-      }
-    }
-  };
-
-  PathFinder.prototype.removeStep = function(step) {
-    var index;
-    index = this.queue.indexOf(step);
-    if (index > -1) {
-      return this.queue.splice(index, 1);
-    }
-  };
-
-  PathFinder.prototype.best = function() {
-    return this.queue[this.queue.length - 1];
-  };
-
-  PathFinder.prototype.getStepRank = function(step) {
-    if (this.queue.length === 0) {
-      return 0;
-    } else {
-      return this._getStepRank(step.getEfficiency(), 0, this.queue.length - 1);
-    }
-  };
-
-  PathFinder.prototype._getStepRank = function(efficiency, min, max) {
-    var ref, refPos;
-    refPos = Math.floor((max - min) / 2) + min;
-    ref = this.queue[refPos].getEfficiency();
-    if (ref === efficiency) {
-      return refPos;
-    } else if (ref > efficiency) {
-      if (refPos === min) {
-        return min;
-      } else {
-        return this._getStepRank(efficiency, min, refPos - 1);
-      }
-    } else {
-      if (refPos === max) {
-        return max + 1;
-      } else {
-        return this._getStepRank(efficiency, refPos + 1, max);
-      }
-    }
-  };
-
   return PathFinder;
 
-})(Element);
+}).call(this);
 
-PathFinder.Step = (function() {
-  function Step(pathFinder, prev, tile1, nextTile) {
+PathFinder.Step = class Step {
+  constructor(pathFinder, prev, tile1, nextTile) {
     this.pathFinder = pathFinder;
     this.prev = prev;
     this.tile = tile1;
     this.nextTile = nextTile;
   }
 
-  Step.prototype.posToTileOffset = function(x, y) {
+  posToTileOffset(x, y) {
     var tile;
     tile = Math.floor(x) === this.tile.x && Math.floor(y) === this.tile.y ? this.tile : (this.nextTile != null) && Math.floor(x) === this.nextTile.x && Math.floor(y) === this.nextTile.y ? this.nextTile : (this.prev != null) && Math.floor(x) === this.prev.tile.x && Math.floor(y) === this.prev.tile.y ? this.prev.tile : console.log('Math.floor(' + x + ') == ' + this.tile.x, 'Math.floor(' + y + ') == ' + this.tile.y, this);
     return {
@@ -233,9 +228,9 @@ PathFinder.Step = (function() {
       offsetX: x - tile.x,
       offsetY: y - tile.y
     };
-  };
+  }
 
-  Step.prototype.getExit = function() {
+  getExit() {
     if (this.exit == null) {
       if (this.nextTile != null) {
         this.exit = {
@@ -250,9 +245,9 @@ PathFinder.Step = (function() {
       }
     }
     return this.exit;
-  };
+  }
 
-  Step.prototype.getEntry = function() {
+  getEntry() {
     if (this.entry == null) {
       if (this.prev != null) {
         this.entry = {
@@ -267,37 +262,37 @@ PathFinder.Step = (function() {
       }
     }
     return this.entry;
-  };
+  }
 
-  Step.prototype.getLength = function() {
+  getLength() {
     if (this.length == null) {
       this.length = (this.nextTile == null) || (this.prev == null) ? 0.5 : this.prev.tile.x === this.nextTile.x || this.prev.tile.y === this.nextTile.y ? 1 : Math.sqrt(0.5);
     }
     return this.length;
-  };
+  }
 
-  Step.prototype.getStartLength = function() {
+  getStartLength() {
     if (this.startLength == null) {
       this.startLength = this.prev != null ? this.prev.getTotalLength() : 0;
     }
     return this.startLength;
-  };
+  }
 
-  Step.prototype.getTotalLength = function() {
+  getTotalLength() {
     if (this.totalLength == null) {
       this.totalLength = this.getStartLength() + this.getLength();
     }
     return this.totalLength;
-  };
+  }
 
-  Step.prototype.getEfficiency = function() {
+  getEfficiency() {
     if (this.efficiency == null) {
       this.efficiency = -this.getRemaining() * 1.1 - this.getTotalLength();
     }
     return this.efficiency;
-  };
+  }
 
-  Step.prototype.getRemaining = function() {
+  getRemaining() {
     var from, to, x, y;
     if (this.remaining == null) {
       from = this.getExit();
@@ -310,10 +305,8 @@ PathFinder.Step = (function() {
       this.remaining = Math.sqrt(x * x + y * y);
     }
     return this.remaining;
-  };
+  }
 
-  return Step;
-
-})();
+};
 
 return(PathFinder);});

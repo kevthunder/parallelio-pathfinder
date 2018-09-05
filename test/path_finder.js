@@ -38,11 +38,9 @@
       assert.equal(this.path.getPosAtPrc(0.5).tile.y, 3);
       assert.equal(this.path.getPosAtPrc(1).x, 19.5);
       assert.equal(this.path.getPosAtPrc(1).y, 10.5);
-      return assert.throws(((function(_this) {
-        return function() {
-          return _this.path.getPosAtPrc('NaN');
-        };
-      })(this)), 'Invalid number');
+      return assert.throws((() => {
+        return this.path.getPosAtPrc('NaN');
+      }), 'Invalid number');
     });
   });
 
