@@ -24,8 +24,9 @@ class PathFinder extends Element
       true
     else if !@started
       @started = true
-      @addNextSteps()
-      true
+      if @tileIsValid(@to)
+        @addNextSteps()
+        true
   getPath: ->
     if @solution
       res = [@solution]
@@ -59,7 +60,7 @@ class PathFinder extends Element
     if @validTileCallback?
       @validTileCallback(tile)
     else
-      !tile.emulated or (tile.tile != 0 and tile.tile != false)
+      tile? and (!tile.emulated or (tile.tile != 0 and tile.tile != false))
   getTile: (x, y) ->
     if @tilesContainer.getTile?
       @tilesContainer.getTile(x, y)

@@ -1,4 +1,4 @@
-(function(definition){PathFinder=definition(typeof(Parallelio)!=="undefined"?Parallelio:this.Parallelio);PathFinder.definition=definition;if(typeof(module)!=="undefined"&&module!==null){module.exports=PathFinder;}else{if(typeof(Parallelio)!=="undefined"&&Parallelio!==null){Parallelio.PathFinder=PathFinder;}else{if(this.Parallelio==null){this.Parallelio={};}this.Parallelio.PathFinder=PathFinder;}}})(function(dependencies){if(dependencies==null){dependencies={};}
+(function(definition){var PathFinder=definition(typeof Parallelio!=="undefined"?Parallelio:this.Parallelio);PathFinder.definition=definition;if(typeof module!=="undefined"&&module!==null){module.exports=PathFinder;}else{if(typeof Parallelio!=="undefined"&&Parallelio!==null){Parallelio.PathFinder=PathFinder;}else{if(this.Parallelio==null){this.Parallelio={};}this.Parallelio.PathFinder=PathFinder;}}})(function(dependencies){if(dependencies==null){dependencies={};}
 var Element = dependencies.hasOwnProperty("Element") ? dependencies.Element : require('spark-starter').Element;
 var PathFinder;
 PathFinder = (function() {
@@ -36,8 +36,10 @@ PathFinder = (function() {
         return true;
       } else if (!this.started) {
         this.started = true;
-        this.addNextSteps();
-        return true;
+        if (this.tileIsValid(this.to)) {
+          this.addNextSteps();
+          return true;
+        }
       }
     }
 
@@ -83,7 +85,7 @@ PathFinder = (function() {
       if (this.validTileCallback != null) {
         return this.validTileCallback(tile);
       } else {
-        return !tile.emulated || (tile.tile !== 0 && tile.tile !== false);
+        return (tile != null) && (!tile.emulated || (tile.tile !== 0 && tile.tile !== false));
       }
     }
 
