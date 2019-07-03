@@ -12,6 +12,9 @@ PathFinder = (function() {
       if (options.validTile != null) {
         this.validTileCallback = options.validTile;
       }
+      if (options.arrived != null) {
+        this.arrivedCallback = options.arrived;
+      }
     }
 
     reset() {
@@ -145,6 +148,14 @@ PathFinder = (function() {
       return tileA === tileB || ((tileA.emulated || tileB.emulated) && tileA.x === tileB.x && tileA.y === tileB.y);
     }
 
+    arrivedAtDestination(step) {
+      if (this.arrivedCallback != null) {
+        return this.arrivedCallback(step.nextTile, this);
+      } else {
+        return this.tileEqual(step.nextTile, this.to);
+      }
+    }
+
     addStep(step) {
       if (this.paths[step.getExit().x] == null) {
         this.paths[step.getExit().x] = {};
@@ -155,7 +166,7 @@ PathFinder = (function() {
         }
         this.paths[step.getExit().x][step.getExit().y] = step;
         this.queue.splice(this.getStepRank(step), 0, step);
-        if (this.tileEqual(step.nextTile, this.to) && !((this.solution != null) && this.solution.prev.getTotalLength() <= step.getTotalLength())) {
+        if (this.arrivedAtDestination(step) && !((this.solution != null) && this.solution.prev.getTotalLength() <= step.getTotalLength())) {
           return this.solution = new PathFinder.Step(this, step, step.nextTile, null);
         }
       }
