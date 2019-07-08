@@ -8,6 +8,8 @@ class PathFinder extends Element
       @validTileCallback = options.validTile
     if options.arrived?
       @arrivedCallback = options.arrived
+    if options.efficiency?
+      @efficiencyCallback = options.efficiency
   @properties
     validTileCallback: {}
   reset: ->
@@ -25,10 +27,12 @@ class PathFinder extends Element
       @addNextSteps(next)
       true
     else if !@started
-      @started = true
-      if @tileIsValid(@to)
-        @addNextSteps()
-        true
+      @start()
+  start: ->
+    @started = true
+    if @to == false or @tileIsValid(@to)
+      @addNextSteps()
+      true
   getPath: ->
     if @solution
       res = [@solution]
@@ -58,6 +62,15 @@ class PathFinder extends Element
           step.getEntry().x + (step.getExit().x-step.getEntry().x) * prc
           step.getEntry().y + (step.getExit().y-step.getEntry().y) * prc
         )
+  getSolutionTileList: ()->
+    if @solution
+      step = @solution
+      tilelist = [step.tile]
+      while step.prev?
+        step = step.prev
+        tilelist.unshift(step.tile)
+      tilelist
+
   tileIsValid: (tile) ->
     if @validTileCallback?
       @validTileCallback(tile)
@@ -196,7 +209,10 @@ class PathFinder.Step
     @totalLength
   getEfficiency: ->
     unless @efficiency?
-      @efficiency = - @getRemaining() * 1.1 - @getTotalLength()
+      if typeof @pathFinder.efficiencyCallback == "function"
+        @efficiency = @pathFinder.efficiencyCallback(this)
+      else
+        @efficiency = - @getRemaining() * 1.1 - @getTotalLength()
     @efficiency
   getRemaining: ->
     unless @remaining?

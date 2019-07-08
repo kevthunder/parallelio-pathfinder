@@ -94,4 +94,49 @@ describe 'PathFinder', ->
     assert.isObject(@path.solution)
     assert.equal @path.solution.tile.x, 18
     assert.equal @path.solution.tile.y, 9
+
+  it 'can have custom step efficiency', ->
+    matrix = [
+      [0, 0, 0, 0, 0, 0, 0],
+      [0, 1, 1, 1, 1, 1, 0],
+      [0, 1, 1, 1, 1, 1, 0],
+      [0, 1, 1, 1, 1, 1, 0],
+      [0, 1, 1, 1, 1, 1, 0],
+      [0, 1, 1, 1, 1, 1, 0],
+      [0, 1, 1, 1, 1, 1, 0],
+      [0, 1, 1, 1, 1, 1, 0],
+      [0, 1, 1, 1, 1, 1, 0],
+      [0, 1, 1, 1, 1, 1, 0],
+      [0, 1, 1, 1, 1, 1, 0],
+      [0, 0, 0, 0, 0, 0, 0],
+    ]
+    customPath = [
+      {x:3,y:1},
+      {x:3,y:2},
+      {x:3,y:3},
+      {x:4,y:3},
+      {x:5,y:3},
+      {x:5,y:4},
+      {x:5,y:5},
+      {x:5,y:6},
+      {x:4,y:6},
+      {x:3,y:6},
+      {x:3,y:7},
+      {x:3,y:8},
+      {x:3,y:9},
+      {x:3,y:10},
+    ]
+    @path = new PathFinder(matrix, {x:3,y:1}, {x:3,y:10},{
+      efficiency: (step)->
+        if customPath.find (t)-> t.x == step.nextTile.x and t.y == step.nextTile.y
+          1
+        else
+          0
+    })
+    assert.isObject(@path.to)
+    @path.calcul()
+    assert.isObject(@path.solution)
+    res = @path.getSolutionTileList().map (t) ->{x:t.x,y:t.y}
+    assert.deepEqual(res,customPath)
+
     

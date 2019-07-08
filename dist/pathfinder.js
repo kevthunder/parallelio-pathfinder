@@ -15,6 +15,9 @@ PathFinder = (function() {
       if (options.arrived != null) {
         this.arrivedCallback = options.arrived;
       }
+      if (options.efficiency != null) {
+        this.efficiencyCallback = options.efficiency;
+      }
     }
 
     reset() {
@@ -38,11 +41,15 @@ PathFinder = (function() {
         this.addNextSteps(next);
         return true;
       } else if (!this.started) {
-        this.started = true;
-        if (this.tileIsValid(this.to)) {
-          this.addNextSteps();
-          return true;
-        }
+        return this.start();
+      }
+    }
+
+    start() {
+      this.started = true;
+      if (this.to === false || this.tileIsValid(this.to)) {
+        this.addNextSteps();
+        return true;
       }
     }
 
@@ -81,6 +88,19 @@ PathFinder = (function() {
           prc = (time - step.getStartLength()) / step.getLength();
           return step.posToTileOffset(step.getEntry().x + (step.getExit().x - step.getEntry().x) * prc, step.getEntry().y + (step.getExit().y - step.getEntry().y) * prc);
         }
+      }
+    }
+
+    getSolutionTileList() {
+      var step, tilelist;
+      if (this.solution) {
+        step = this.solution;
+        tilelist = [step.tile];
+        while (step.prev != null) {
+          step = step.prev;
+          tilelist.unshift(step.tile);
+        }
+        return tilelist;
       }
     }
 
@@ -300,7 +320,11 @@ PathFinder.Step = class Step {
 
   getEfficiency() {
     if (this.efficiency == null) {
-      this.efficiency = -this.getRemaining() * 1.1 - this.getTotalLength();
+      if (typeof this.pathFinder.efficiencyCallback === "function") {
+        this.efficiency = this.pathFinder.efficiencyCallback(this);
+      } else {
+        this.efficiency = -this.getRemaining() * 1.1 - this.getTotalLength();
+      }
     }
     return this.efficiency;
   }
