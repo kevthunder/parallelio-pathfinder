@@ -86,8 +86,8 @@ describe 'PathFinder', ->
       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     ]
     @path = new PathFinder(matrix, {x:2,y:2}, {x:19,y:10},{
-      arrived: (tile,path)->
-        Math.max(Math.abs(tile.x-path.to.x),Math.abs(tile.y-path.to.y)) <= 1
+      arrived: (step)->
+        Math.max(Math.abs(step.tile.x-step.pathFinder.to.x),Math.abs(step.tile.y-step.pathFinder.to.y)) <= 1
     })
     assert.isObject(@path.to)
     @path.calcul()

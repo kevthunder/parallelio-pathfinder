@@ -62,8 +62,8 @@
         x: 19,
         y: 10
       }, {
-        arrived: function(tile, path) {
-          return Math.max(Math.abs(tile.x - path.to.x), Math.abs(tile.y - path.to.y)) <= 1;
+        arrived: function(step) {
+          return Math.max(Math.abs(step.tile.x - step.pathFinder.to.x), Math.abs(step.tile.y - step.pathFinder.to.y)) <= 1;
         }
       });
       assert.isObject(this.path.to);

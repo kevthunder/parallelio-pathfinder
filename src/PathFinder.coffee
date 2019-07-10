@@ -109,9 +109,9 @@ class PathFinder extends Element
     tileA == tileB or ((tileA.emulated or tileB.emulated) and tileA.x == tileB.x and tileA.y == tileB.y)
   arrivedAtDestination: (step)->
     if @arrivedCallback?
-      @arrivedCallback(step.nextTile, this)
+      @arrivedCallback(step)
     else
-      @tileEqual(step.nextTile, @to)
+      @tileEqual(step.tile, @to)
   addStep: (step)->
     @paths[step.getExit().x] = {} unless @paths[step.getExit().x]?
     unless @paths[step.getExit().x][step.getExit().y]? and @paths[step.getExit().x][step.getExit().y].getTotalLength() <= step.getTotalLength()
@@ -119,8 +119,9 @@ class PathFinder extends Element
         @removeStep(@paths[step.getExit().x][step.getExit().y])
       @paths[step.getExit().x][step.getExit().y] = step
       @queue.splice(@getStepRank(step), 0, step)
-      if @arrivedAtDestination(step) and !(@solution? and @solution.prev.getTotalLength() <= step.getTotalLength())
-        @solution = new PathFinder.Step(this, step, step.nextTile, null)
+      solutionCandidate = new PathFinder.Step(this, step, step.nextTile, null)
+      if @arrivedAtDestination(solutionCandidate) and !(@solution? and @solution.prev.getTotalLength() <= step.getTotalLength())
+        @solution = solutionCandidate
   removeStep: (step)->
     index = @queue.indexOf(step)
     if index > -1

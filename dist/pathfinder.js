@@ -170,13 +170,14 @@ PathFinder = (function() {
 
     arrivedAtDestination(step) {
       if (this.arrivedCallback != null) {
-        return this.arrivedCallback(step.nextTile, this);
+        return this.arrivedCallback(step);
       } else {
-        return this.tileEqual(step.nextTile, this.to);
+        return this.tileEqual(step.tile, this.to);
       }
     }
 
     addStep(step) {
+      var solutionCandidate;
       if (this.paths[step.getExit().x] == null) {
         this.paths[step.getExit().x] = {};
       }
@@ -186,8 +187,9 @@ PathFinder = (function() {
         }
         this.paths[step.getExit().x][step.getExit().y] = step;
         this.queue.splice(this.getStepRank(step), 0, step);
-        if (this.arrivedAtDestination(step) && !((this.solution != null) && this.solution.prev.getTotalLength() <= step.getTotalLength())) {
-          return this.solution = new PathFinder.Step(this, step, step.nextTile, null);
+        solutionCandidate = new PathFinder.Step(this, step, step.nextTile, null);
+        if (this.arrivedAtDestination(solutionCandidate) && !((this.solution != null) && this.solution.prev.getTotalLength() <= step.getTotalLength())) {
+          return this.solution = solutionCandidate;
         }
       }
     }
